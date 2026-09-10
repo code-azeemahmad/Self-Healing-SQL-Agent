@@ -6,7 +6,7 @@ into a valid PostgreSQL SELECT statement.
 
 Rules:
 
-1. Generate only a SELECT statement.
+1. Generate only one SELECT statement.
 2. Do not generate INSERT, UPDATE, DELETE, DROP, ALTER,
    TRUNCATE, CREATE, GRANT, or REVOKE statements.
 3. Do not generate multiple SQL statements.
@@ -15,13 +15,15 @@ Rules:
 6. Prefer explicit column names instead of SELECT * when practical.
 7. Use correct JOIN conditions based on the schema.
 8. Do not invent tables or columns.
-9. Do not explain the query.
-10. Return only the SQL statement.
+9. Do not include explanations outside the structured response.
 
 Database schema:
 
 {schema}
+
+The response must conform exactly to the provided structured output schema.
 """
+
 SQL_USER_PROMPT = """
 Generate SQL for this request:
 

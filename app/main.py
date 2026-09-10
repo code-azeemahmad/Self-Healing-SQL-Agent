@@ -7,6 +7,7 @@ from app.db.dependencies import get_db
 from app.db.schema import format_schema, get_database_schema
 from app.llm.sql_generator import generate_sql
 
+
 settings = get_settings()
 
 app = FastAPI(
@@ -32,7 +33,10 @@ async def health_check() -> dict[str, str]:
     }
 
 
-@app.post("/api/v1/sql/generate", response_model=SQLGenerationResponse)
+@app.post(
+    "/api/v1/sql/generate",
+    response_model=SQLGenerationResponse,
+)
 async def generate_sql_endpoint(
     request: SQLGenerationRequest,
     db: AsyncSession = Depends(get_db),
@@ -40,12 +44,12 @@ async def generate_sql_endpoint(
     schema = await get_database_schema(db)
     schema_text = format_schema(schema)
 
-    sql = await generate_sql(
+    generated = await generate_sql(
         user_query=request.query,
         schema=schema_text,
     )
 
     return SQLGenerationResponse(
         query=request.query,
-        sql=sql,
+        sql=generated.sql,
     )
