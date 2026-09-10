@@ -1,0 +1,47 @@
+# =========================
+# Web API
+# =========================
+fastapi
+uvicorn[standard]
+
+# =========================
+# Configuration & Validation
+# =========================
+pydantic
+pydantic-settings
+
+# =========================
+# Database
+# =========================
+sqlalchemy[asyncio]
+asyncpg
+alembic
+
+# =========================
+# LangGraph / LangChain
+# =========================
+langgraph
+langchain
+langchain-ollama
+
+# =========================
+# Ollama
+# =========================
+ollama
+
+# =========================
+# SQL Parsing / Validation
+# =========================
+sqlparse
+
+# =========================
+# Testing
+# =========================
+pytest
+pytest-asyncio
+httpx
+
+# =========================
+# Development
+# =========================
+python-dotenv

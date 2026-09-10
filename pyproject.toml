@@ -1,0 +1,22 @@
+[project]
+name = "self-healing-sql-agent"
+version = "0.1.0"
+description = "Autonomous self-healing SQL agent using FastAPI, LangGraph, PostgreSQL, and Ollama"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "pydantic-settings",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "httpx",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
