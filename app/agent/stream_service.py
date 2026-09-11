@@ -92,6 +92,14 @@ async def stream_agent(
         ),
         "data": {
             "sql": latest_state.get("sql"),
+            "rows": latest_state.get(
+                "execution_rows",
+                [],
+            ),
+            "columns": latest_state.get(
+                "execution_columns",
+                [],
+            ),
             "attempt": latest_state.get("attempt", 1),
             "max_attempts": latest_state.get(
                 "max_attempts",
