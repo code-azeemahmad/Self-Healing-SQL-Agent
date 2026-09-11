@@ -1,0 +1,120 @@
+[
+  {
+    "id": "simple-01",
+    "question": "Show all customers",
+    "case_type": "simple",
+    "expected_success": true,
+    "recoverable": false,
+    "reference_sql": "SELECT id, name, email, segment, country, created_at FROM customers",
+    "description": "Basic customer retrieval"
+  },
+  {
+    "id": "simple-02",
+    "question": "How many customers are from Pakistan?",
+    "case_type": "simple",
+    "expected_success": true,
+    "recoverable": false,
+    "reference_sql": "SELECT COUNT(*) AS count FROM customers WHERE country = 'Pakistan'",
+    "description": "Filtered customer count"
+  },
+  {
+    "id": "simple-03",
+    "question": "Show premium customers",
+    "case_type": "simple",
+    "expected_success": true,
+    "recoverable": false,
+    "reference_sql": "SELECT id, name, email, segment, country, created_at FROM customers WHERE segment = 'premium'",
+    "description": "Segment filtering"
+  },
+  {
+    "id": "simple-04",
+    "question": "Show products in the electronics category",
+    "case_type": "simple",
+    "expected_success": true,
+    "recoverable": false,
+    "reference_sql": "SELECT id, name, category, price FROM products WHERE category = 'electronics'",
+    "description": "Product category filter"
+  },
+  {
+    "id": "simple-05",
+    "question": "Show completed orders",
+    "case_type": "simple",
+    "expected_success": true,
+    "recoverable": false,
+    "reference_sql": "SELECT id, customer_id, status, total_amount, created_at FROM orders WHERE status = 'completed'",
+    "description": "Order status filter"
+  },
+  {
+    "id": "simple-06",
+    "question": "Show all failed payments",
+    "case_type": "simple",
+    "expected_success": true,
+    "recoverable": false,
+    "reference_sql": "SELECT id, order_id, status, amount, payment_method, created_at FROM payments WHERE status = 'failed'",
+    "description": "Payment status filter"
+  },
+  {
+    "id": "simple-07",
+    "question": "Show all open support tickets",
+    "case_type": "simple",
+    "expected_success": true,
+    "recoverable": false,
+    "reference_sql": "SELECT id, customer_id, category, status, priority, created_at FROM support_tickets WHERE status = 'open'",
+    "description": "Support ticket filtering"
+  },
+  {
+    "id": "aggregation-01",
+    "question": "What is the average order value?",
+    "case_type": "aggregation",
+    "expected_success": true,
+    "recoverable": false,
+    "reference_sql": "SELECT AVG(total_amount) AS average_order_value FROM orders",
+    "description": "Average aggregation"
+  },
+  {
+    "id": "aggregation-02",
+    "question": "What is the total revenue from completed orders?",
+    "case_type": "aggregation",
+    "expected_success": true,
+    "recoverable": false,
+    "reference_sql": "SELECT SUM(total_amount) AS total_revenue FROM orders WHERE status = 'completed'",
+    "description": "Revenue aggregation"
+  },
+  {
+    "id": "aggregation-03",
+    "question": "How many orders does each customer have?",
+    "case_type": "aggregation",
+    "expected_success": true,
+    "recoverable": false,
+    "reference_sql": "SELECT customer_id, COUNT(*) AS order_count FROM orders GROUP BY customer_id",
+    "description": "Customer order count"
+  },
+  {
+    "id": "join-01",
+    "question": "Show customer names and their order statuses",
+    "case_type": "join",
+    "expected_success": true,
+    "recoverable": false,
+    "reference_sql": "SELECT c.name, o.status FROM customers c JOIN orders o ON c.id = o.customer_id",
+    "description": "Customer to order join"
+  },
+  {
+    "id": "join-02",
+    "question": "Show customers who have failed payments",
+    "case_type": "join",
+    "expected_success": true,
+    "recoverable": false,
+    "reference_sql": "SELECT DISTINCT c.name FROM customers c JOIN orders o ON c.id = o.customer_id JOIN payments p ON o.id = p.order_id WHERE p.status = 'failed'",
+    "description": "Customer to order to payment join"
+  },
+  {
+    "id": "recovery-01",
+    "question": "Show the names of all customers",
+    "case_type": "recoverable",
+    "expected_success": true,
+    "recoverable": true,
+    "failure_sql": "SELECT customer_name FROM customers",
+    "reference_sql": "SELECT name FROM customers",
+    "description": "Undefined column recovery"
+  }
+]

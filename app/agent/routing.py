@@ -13,6 +13,9 @@ RECOVERABLE_ERRORS = {
 def route_after_validation(
     state: AgentState,
 ) -> str:
+    if state.get("status") == "classifying_error":
+        return "classify_error"
+
     if state.get("status") == "failed":
         return "failed"
 

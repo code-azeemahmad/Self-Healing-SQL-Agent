@@ -72,6 +72,7 @@ def build_agent_graph():
         route_after_validation,
         {
             "execute_sql": "execute_sql",
+            "classify_error": "classify_error",
             "failed": END,
         },
     )
@@ -102,6 +103,100 @@ def build_agent_graph():
     builder.add_edge(
         "repair_sql",
         "validate_sql",
+    )
+
+    builder.add_edge(
+        "format_result",
+        END,
+    )
+
+    return builder.compile()
+
+
+def build_healing_test_graph():
+    """
+    Test-only graph entrypoint that starts directly at execute_sql
+    with a deliberately provided broken SQL query, then transitions
+    through the production classification, diagnosis, repair, validation,
+    and re-execution nodes.
+    """
+    builder = StateGraph(
+        AgentState,
+        context_schema=AgentContext,
+    )
+
+    builder.add_node(
+        "execute_sql",
+        execute_sql_node,
+    )
+
+    builder.add_node(
+        "classify_error",
+        classify_sql_error_node,
+    )
+
+    builder.add_node(
+        "diagnose",
+        diagnose_error_node,
+    )
+
+    builder.add_node(
+        "repair_sql",
+        repair_sql_node,
+    )
+
+    builder.add_node(
+        "validate_sql",
+        validate_sql_node,
+    )
+
+    builder.add_node(
+        "format_result",
+        format_result_node,
+    )
+
+    # Start directly by executing the initial broken SQL against Postgres
+    builder.add_edge(
+        START,
+        "execute_sql",
+    )
+
+    builder.add_conditional_edges(
+        "execute_sql",
+        route_after_execution,
+        {
+            "format_result": "format_result",
+            "classify_error": "classify_error",
+        },
+    )
+
+    builder.add_conditional_edges(
+        "classify_error",
+        route_after_classification,
+        {
+            "diagnose": "diagnose",
+            "failed": END,
+        },
+    )
+
+    builder.add_edge(
+        "diagnose",
+        "repair_sql",
+    )
+
+    builder.add_edge(
+        "repair_sql",
+        "validate_sql",
+    )
+
+    builder.add_conditional_edges(
+        "validate_sql",
+        route_after_validation,
+        {
+            "execute_sql": "execute_sql",
+            "classify_error": "classify_error",
+            "failed": END,
+        },
     )
 
     builder.add_edge(

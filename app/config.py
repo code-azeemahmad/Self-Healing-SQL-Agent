@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     postgres_host: str
     postgres_port: int
     postgres_db: str
+
     postgres_user: str
     postgres_password: str
 
@@ -24,6 +25,11 @@ class Settings(BaseSettings):
     max_attempts: int = 3
     sse_enabled: bool = True
 
+    # Database protection
+    db_statement_timeout_ms: int = 5000
+    max_result_rows: int = 500
+    max_result_bytes: int = 200_000
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -37,6 +43,17 @@ class Settings(BaseSettings):
             drivername="postgresql+asyncpg",
             username=self.postgres_user,
             password=self.postgres_password,
+            host=self.postgres_host,
+            port=self.postgres_port,
+            database=self.postgres_db,
+        ).render_as_string(hide_password=False)
+
+    @property
+    def agent_database_url(self) -> str:
+        return URL.create(
+            drivername="postgresql+asyncpg",
+            username=self.postgres_agent_user,
+            password=self.postgres_agent_password,
             host=self.postgres_host,
             port=self.postgres_port,
             database=self.postgres_db,

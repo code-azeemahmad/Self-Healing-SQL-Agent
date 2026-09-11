@@ -13,6 +13,12 @@ function getEventLabel(event: AgentEvent): string {
       return "SQL generated";
 
     case "validation.updated":
+      if (
+        event.data.status === "classifying_error" ||
+        event.data.status === "failed"
+      ) {
+        return "SQL validation detected error";
+      }
       return "SQL validated";
 
     case "execution.updated":
@@ -55,10 +61,11 @@ function getIcon(event: AgentEvent): string {
 
   if (
     event.event === "error.classified" ||
-    (
-      event.event === "execution.updated" &&
-      event.data.status === "classifying_error"
-    )
+    (event.event === "execution.updated" &&
+      event.data.status === "classifying_error") ||
+    (event.event === "validation.updated" &&
+      (event.data.status === "classifying_error" ||
+        event.data.status === "failed"))
   ) {
     return "✗";
   }

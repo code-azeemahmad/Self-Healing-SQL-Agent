@@ -33,17 +33,20 @@ export function QueryInput({
         onChange={(event) =>
           setQuery(event.target.value)
         }
-        placeholder="Ask a question about your database..."
+        placeholder="Ask a question about your database (or enter a SQL query)..."
         rows={4}
         disabled={disabled}
       />
 
-      <button
-        type="submit"
-        disabled={disabled || !query.trim()}
-      >
-        {disabled ? "Running..." : "Run Query"}
-      </button>
+      <div className="button-group">
+        <button
+          type="submit"
+          disabled={disabled || !query.trim()}
+          className="btn-primary"
+        >
+          {disabled ? "Running..." : "Run Query"}
+        </button>
+      </div>
     </form>
   );
 }

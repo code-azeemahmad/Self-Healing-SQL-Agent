@@ -1,20 +1,24 @@
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agent.service import run_agent
+from app.api.errors import generic_exception_handler
 from app.api.routes_agent import router as agent_router
 from app.config import get_settings
 from app.db.dependencies import get_db
 
 settings = get_settings()
 
-
-from fastapi.middleware.cors import CORSMiddleware
-
 app = FastAPI(
     title="Self-Healing SQL Agent",
     version="0.1.0",
+)
+
+app.add_exception_handler(
+    Exception,
+    generic_exception_handler,
 )
 
 app.add_middleware(
@@ -59,7 +63,8 @@ async def health_check() -> dict[str, str]:
         "status": "healthy",
         "service": "Self-Healing SQL Agent",
     }
-    
+
+
 app.include_router(agent_router)
 
 

@@ -6,6 +6,8 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import get_settings
+
 
 class SQLExecutionResult:
     def __init__(
@@ -23,23 +25,38 @@ async def execute_sql(
     session: AsyncSession,
     sql: str,
 ) -> SQLExecutionResult:
+    settings = get_settings()
+
     started = time.perf_counter()
 
-    result = await session.execute(text(sql))
+    try:
+        timeout_ms = int(settings.db_statement_timeout_ms)
+        await session.execute(
+            text(f"SET LOCAL statement_timeout = {timeout_ms}")
+        )
 
-    rows = [
-        dict(row)
-        for row in result.mappings().all()
-    ]
+        result = await session.execute(
+            text(sql)
+        )
 
-    columns = list(result.keys())
+        rows = [
+            dict(row)
+            for row in result.mappings().fetchmany(
+                settings.max_result_rows
+            )
+        ]
 
-    execution_ms = (
-        time.perf_counter() - started
-    ) * 1000
+        columns = list(result.keys())
 
-    return SQLExecutionResult(
-        rows=rows,
-        columns=columns,
-        execution_ms=execution_ms,
-    )
+        execution_ms = (
+            time.perf_counter() - started
+        ) * 1000
+
+        return SQLExecutionResult(
+            rows=rows,
+            columns=columns,
+            execution_ms=execution_ms,
+        )
+    except Exception:
+        await session.rollback()
+        raise

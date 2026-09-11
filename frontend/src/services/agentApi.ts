@@ -25,6 +25,35 @@ export async function streamAgentQuery(
     },
   );
 
+  await processSSEResponse(response, callbacks);
+}
+
+export async function streamHealingTest(
+  callbacks: StreamCallbacks,
+  sql: string = "SELECT customer_name FROM customers;",
+  query: string = "Show all customers",
+): Promise<void> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/agent/test-healing/stream`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sql,
+        query,
+      }),
+    },
+  );
+
+  await processSSEResponse(response, callbacks);
+}
+
+async function processSSEResponse(
+  response: Response,
+  callbacks: StreamCallbacks,
+): Promise<void> {
   if (!response.ok) {
     throw new Error(
       `Agent request failed with status ${response.status}.`,

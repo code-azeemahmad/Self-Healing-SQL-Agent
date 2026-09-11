@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from sqlalchemy import delete
 
-from app.db.engine import AsyncSessionLocal
+from app.db.engine import AdminSessionLocal
 from app.db.models import (
     Customer,
     Order,
@@ -16,7 +16,7 @@ from app.db.models import (
 
 
 async def seed_database() -> None:
-    async with AsyncSessionLocal() as session:
+    async with AdminSessionLocal() as session:
         # Clear existing data.
         await session.execute(delete(SupportTicket))
         await session.execute(delete(Payment))
