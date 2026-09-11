@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -6,7 +6,7 @@ from app.config import get_settings
 from app.db.dependencies import get_db
 from app.db.schema import format_schema, get_database_schema
 from app.llm.sql_generator import generate_sql
-
+from app.validation.sql_guard import SQLGuardError, validate_sql
 
 settings = get_settings()
 
@@ -49,7 +49,20 @@ async def generate_sql_endpoint(
         schema=schema_text,
     )
 
+    schema_for_validation = schema
+
+    try:
+        validated = validate_sql(
+            generated,
+            schema_for_validation,
+        )
+    except SQLGuardError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        ) from exc
+
     return SQLGenerationResponse(
         query=request.query,
-        sql=generated.sql,
+        sql=validated.sql,
     )

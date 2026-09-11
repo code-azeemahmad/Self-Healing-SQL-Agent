@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     postgres_user: str
     postgres_password: str
 
+    postgres_agent_user: str
+    postgres_agent_password: str
+
     # Ollama
     ollama_base_url: str
     ollama_embedding_model: str
