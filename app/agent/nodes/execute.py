@@ -19,13 +19,15 @@ async def execute_sql_node(
             "execution_rows": result.rows,
             "execution_columns": result.columns,
             "execution_ms": result.execution_ms,
-            "status": "formatting",
+            "status": "completed",
+            "error_category": None,
+            "error_message": None,
+            "termination_reason": "successful_execution",
         }
 
     except Exception as exc:
         return {
-            "error_category": "database_error",
+            "error_category": None,
             "error_message": str(exc),
-            "status": "failed",
-            "termination_reason": "sql_execution_failed",
+            "status": "classifying_error",
         }

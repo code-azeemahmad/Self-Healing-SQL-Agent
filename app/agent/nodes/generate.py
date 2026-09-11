@@ -12,5 +12,6 @@ async def generate_sql_node(
 
     return {
         "sql": result.sql,
+        "llm_calls": state.get("llm_calls", 0) + 1,
         "status": "validating",
     }
