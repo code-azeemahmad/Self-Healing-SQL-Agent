@@ -1,12 +1,11 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agent.service import run_agent
 from app.config import get_settings
 from app.db.dependencies import get_db
-from app.db.schema import format_schema, get_database_schema
-from app.llm.sql_generator import generate_sql
-from app.validation.sql_guard import SQLGuardError, validate_sql
+
 
 settings = get_settings()
 
@@ -16,13 +15,20 @@ app = FastAPI(
 )
 
 
-class SQLGenerationRequest(BaseModel):
+class AgentQueryRequest(BaseModel):
     query: str
 
 
-class SQLGenerationResponse(BaseModel):
+class AgentQueryResponse(BaseModel):
     query: str
-    sql: str
+    sql: str | None
+    rows: list[dict]
+    columns: list[str]
+    execution_ms: float
+    status: str
+    error_category: str | None
+    error_message: str | None
+    termination_reason: str | None
 
 
 @app.get("/health")
@@ -34,35 +40,28 @@ async def health_check() -> dict[str, str]:
 
 
 @app.post(
-    "/api/v1/sql/generate",
-    response_model=SQLGenerationResponse,
+    "/api/v1/agent/query",
+    response_model=AgentQueryResponse,
 )
-async def generate_sql_endpoint(
-    request: SQLGenerationRequest,
+async def agent_query(
+    request: AgentQueryRequest,
     db: AsyncSession = Depends(get_db),
-) -> SQLGenerationResponse:
-    schema = await get_database_schema(db)
-    schema_text = format_schema(schema)
-
-    generated = await generate_sql(
+) -> AgentQueryResponse:
+    result = await run_agent(
         user_query=request.query,
-        schema=schema_text,
+        db=db,
     )
 
-    schema_for_validation = schema
-
-    try:
-        validated = validate_sql(
-            generated,
-            schema_for_validation,
-        )
-    except SQLGuardError as exc:
-        raise HTTPException(
-            status_code=400,
-            detail=str(exc),
-        ) from exc
-
-    return SQLGenerationResponse(
+    return AgentQueryResponse(
         query=request.query,
-        sql=validated.sql,
+        sql=result.get("sql"),
+        rows=result.get("execution_rows", []),
+        columns=result.get("execution_columns", []),
+        execution_ms=result.get("execution_ms", 0.0),
+        status=result.get("status", "failed"),
+        error_category=result.get("error_category"),
+        error_message=result.get("error_message"),
+        termination_reason=result.get(
+            "termination_reason"
+        ),
     )
