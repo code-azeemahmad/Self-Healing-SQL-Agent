@@ -3,11 +3,12 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agent.service import run_agent
+from app.api.routes_agent import router as agent_router
 from app.config import get_settings
 from app.db.dependencies import get_db
 
-
 settings = get_settings()
+
 
 app = FastAPI(
     title="Self-Healing SQL Agent",
@@ -48,6 +49,8 @@ async def health_check() -> dict[str, str]:
         "status": "healthy",
         "service": "Self-Healing SQL Agent",
     }
+    
+app.include_router(agent_router)
 
 
 @app.post(
